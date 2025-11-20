@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import api from "../services/api"; // <-- Using axios instance
 
 const LoginPage = ({ onLogin }) => {
   const [role, setRole] = useState("user");
@@ -13,38 +14,30 @@ const LoginPage = ({ onLogin }) => {
     setError("");
 
     try {
-      // ✅ Pick correct endpoint based on role and action
-      const endpoint = isSignup
-        ? role === "vendor"
-          ? "http://localhost:5000/api/users/register"
-          : "http://localhost:5000/api/validusers/register"
-        : role === "vendor"
-          ? "http://localhost:5000/api/users/login"
-          : "http://localhost:5000/api/validusers/login";
+      // Base endpoint (no localhost)
+      const base = role === "vendor" ? "/users" : "/validusers";
 
-      // ✅ Body depends on signup or login
+      const endpoint = isSignup
+        ? `${base}/register`
+        : `${base}/login`;
+
+      // Request body
       const body = isSignup
         ? { name: username, email, password, role }
         : { name: username, password };
 
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Something went wrong");
+      const { data } = await api.post(endpoint, body);
 
       alert(isSignup ? "Signup successful!" : "Login successful!");
 
+      // Save login details
       localStorage.setItem("token", data.token);
       localStorage.setItem("userRole", data.user.role);
       localStorage.setItem("username", data.user.name);
 
       onLogin(data.user.role, data.user.name);
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -55,7 +48,7 @@ const LoginPage = ({ onLogin }) => {
           🍴 FoodExpress {isSignup ? "Signup" : "Login"}
         </h1>
 
-        {/* 🔹 Role Selector */}
+        {/* Role Selector */}
         <div className="flex justify-center gap-4 mb-6">
           <button
             onClick={() => setRole("user")}
@@ -79,7 +72,7 @@ const LoginPage = ({ onLogin }) => {
           </button>
         </div>
 
-        {/* 🔹 Form */}
+        {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             type="text"
