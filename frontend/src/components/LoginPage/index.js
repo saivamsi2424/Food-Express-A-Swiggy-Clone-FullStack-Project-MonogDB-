@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import api from "../services/api"; // <-- Using axios instance
+import api from "../../services/api";  // ✅ FIXED IMPORT PATH
 
 const LoginPage = ({ onLogin }) => {
   const [role, setRole] = useState("user");
@@ -14,23 +14,17 @@ const LoginPage = ({ onLogin }) => {
     setError("");
 
     try {
-      // Base endpoint (no localhost)
       const base = role === "vendor" ? "/users" : "/validusers";
+      const endpoint = isSignup ? `${base}/register` : `${base}/login`;
 
-      const endpoint = isSignup
-        ? `${base}/register`
-        : `${base}/login`;
-
-      // Request body
       const body = isSignup
         ? { name: username, email, password, role }
         : { name: username, password };
 
-      const { data } = await api.post(endpoint, body);
+      const { data } = await api.post(endpoint, body);  // ✅ uses backend URL automatically
 
       alert(isSignup ? "Signup successful!" : "Login successful!");
 
-      // Save login details
       localStorage.setItem("token", data.token);
       localStorage.setItem("userRole", data.user.role);
       localStorage.setItem("username", data.user.name);
@@ -48,14 +42,11 @@ const LoginPage = ({ onLogin }) => {
           🍴 FoodExpress {isSignup ? "Signup" : "Login"}
         </h1>
 
-        {/* Role Selector */}
         <div className="flex justify-center gap-4 mb-6">
           <button
             onClick={() => setRole("user")}
             className={`px-4 py-2 rounded-lg font-semibold ${
-              role === "user"
-                ? "bg-orange-500 text-white"
-                : "bg-gray-200 text-gray-700"
+              role === "user" ? "bg-orange-500 text-white" : "bg-gray-200 text-gray-700"
             }`}
           >
             User
@@ -63,23 +54,20 @@ const LoginPage = ({ onLogin }) => {
           <button
             onClick={() => setRole("vendor")}
             className={`px-4 py-2 rounded-lg font-semibold ${
-              role === "vendor"
-                ? "bg-orange-500 text-white"
-                : "bg-gray-200 text-gray-700"
+              role === "vendor" ? "bg-orange-500 text-white" : "bg-gray-200 text-gray-700"
             }`}
           >
             Vendor
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             type="text"
             placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:outline-none"
+            className="w-full px-4 py-2 border rounded-lg"
           />
 
           {isSignup && (
@@ -88,7 +76,7 @@ const LoginPage = ({ onLogin }) => {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:outline-none"
+              className="w-full px-4 py-2 border rounded-lg"
             />
           )}
 
@@ -97,15 +85,12 @@ const LoginPage = ({ onLogin }) => {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:outline-none"
+            className="w-full px-4 py-2 border rounded-lg"
           />
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
-          <button
-            type="submit"
-            className="bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition-all"
-          >
+          <button type="submit" className="bg-orange-500 text-white py-2 rounded-lg">
             {isSignup ? "Sign Up" : "Login"}
           </button>
         </form>
@@ -114,9 +99,7 @@ const LoginPage = ({ onLogin }) => {
           onClick={() => setIsSignup(!isSignup)}
           className="mt-4 text-orange-600 hover:underline text-sm"
         >
-          {isSignup
-            ? "Already have an account? Login"
-            : "New User? Create Account"}
+          {isSignup ? "Already have an account? Login" : "New User? Create Account"}
         </button>
       </div>
     </div>
