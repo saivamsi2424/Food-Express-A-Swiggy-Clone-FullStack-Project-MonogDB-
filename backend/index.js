@@ -12,19 +12,33 @@ import orderRoutes from "./routes/orderRoutes.js";
 import favouriteRoutes from "./routes/favouriteRoutes.js";
 
 dotenv.config();
-
 connectDB();
 
 const app = express();
-
 app.use(express.json());
+
+// ---------- CORS FIX ----------
+const allowedOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(",")
+  : [];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL.split(","), 
+    origin: function (origin, callback) {
+      // Allow requests with no origin (mobile apps, curl, etc.)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("CORS Not Allowed: " + origin), false);
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
+// ---------- END CORS FIX ----------
 
 app.use("/api/users", userRoutes);
 app.use("/api/hotels", hotelRoutes);

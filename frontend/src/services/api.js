@@ -1,9 +1,11 @@
 import axios from "axios";
 
-const backendURL = process.env.REACT_APP_BACKEND_URL.replace(/\/$/, "");
+//const backendURL = process.env.REACT_APP_BACKEND_URL.replace(/\/+$/, "");
+
+const backendURL = "http://localhost:3000"
 
 const api = axios.create({
-  baseURL: `${backendURL}/api`,
+  baseURL: `${backendURL}/api`,  // NO DOUBLE SLASH POSSIBLE NOW
 });
 
 api.interceptors.request.use((config) => {
