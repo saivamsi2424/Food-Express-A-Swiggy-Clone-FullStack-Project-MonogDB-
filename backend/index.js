@@ -17,29 +17,32 @@ connectDB();
 const app = express();
 app.use(express.json());
 
-// ---------- CORS FIX ----------
+// --- CORS FIXED ---
 const allowedOrigins = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(",")
+  ? process.env.FRONTEND_URL.split(",").map(o => o.trim())
   : [];
+
+console.log("Allowed Origins:", allowedOrigins);
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (mobile apps, curl, etc.)
-      if (!origin) return callback(null, true);
+      if (!origin) return callback(null, true); // mobile, postman
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
-      } else {
-        return callback(new Error("CORS Not Allowed: " + origin), false);
       }
+
+      console.warn("❌ Blocked by CORS:", origin);
+      return callback(new Error("Not allowed by CORS: " + origin), false);
     },
     methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
-// ---------- END CORS FIX ----------
 
+// --- ROUTES ---
 app.use("/api/users", userRoutes);
 app.use("/api/hotels", hotelRoutes);
 app.use("/api/validusers", validUserRoutes);
@@ -52,5 +55,6 @@ app.get("/", (req, res) => {
   res.send("✅ API is running successfully!");
 });
 
+// --- START SERVER ---
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
